@@ -1,0 +1,30 @@
+services:
+    mono:
+        container_name: home-mono
+        build:
+            context: .
+            dockerfile: Dockerfile
+
+        restart: unless-stopped
+        working_dir: /app
+        command: pnpm dev
+
+        ports:
+            - target: 3000
+              published: 3000
+
+            - target: 5173
+              published: 5173
+
+        env_file:
+            - .env
+
+        volumes:
+            - ./:/app
+
+        networks:
+            - home_mono
+networks:
+    home_mono:
+        name: home_mono
+        driver: bridge
