@@ -7,12 +7,11 @@ import { Migrator, FileMigrationProvider } from "kysely";
 import pg, { Pool } from "pg";
 
 import createPGPool from "../index.mjs";
+import { logger } from "../../utils/logger.mjs";
 // dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const upDown = process.argv.slice(-1)[0];
 
 const db = new Kysely<any>({
     dialect: new PostgresDialect({
@@ -20,7 +19,7 @@ const db = new Kysely<any>({
     }),
 });
 
-export const migrate = async (): Promise<void> => {
+export const migrate = async (forward: boolean): Promise<void> => {
     const migrator = new Migrator({
         db: db,
         provider: new FileMigrationProvider({
@@ -30,13 +29,9 @@ export const migrate = async (): Promise<void> => {
         }),
     });
 
-    if (upDown === "up") {
-        var { error, results } = await migrator.migrateToLatest();
-    } else if (upDown === "down") {
-        var { error, results } = await migrator.migrateDown();
-    } else {
-        throw new Error("\n\n\nERROR: migration must be 'up' or 'down'\n\n\n");
-    }
+    const { error, results } = forward
+        ? await migrator.migrateToLatest()
+        : await migrator.migrateDown();
 
     const migrationResults: {
         Migration: string;
@@ -91,13 +86,19 @@ export const migrate = async (): Promise<void> => {
     }
 };
 
-await (async () => {
-    console.log("\n\n---------------MIGRATION START----------------\n\n");
+export const run_migration = async ({
+    migrateMode,
+}: {
+    migrateMode: "up" | "down";
+}) => {
+    logger.debug(`Running migration in ${migrateMode} mode...`);
+    if (migrateMode !== "up" && migrateMode !== "down") {
+        throw new Error("Invalid migrateMode. Use 'up' or 'down'.");
+    }
     try {
-        await migrate();
+        await migrate(migrateMode === "up");
     } catch (error) {
         console.error(error);
     }
-    console.log("\n\n---------------MIGRATION FINISH----------------\n\n");
-    process.exit(0);
-})();
+    logger.debug(`Migration in ${migrateMode} mode completed.`);
+};

@@ -41,6 +41,7 @@
         "pg": "^8.16.2",
         "server:10.45.2": "link:@trpc/server:10.45.2",
         "trpc-playground": "^1.0.4",
+        "tsx": "^4.20.3",
         "winston": "^3.17.0",
         "zod": "^3.25.67"
     }

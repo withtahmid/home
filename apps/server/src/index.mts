@@ -6,8 +6,9 @@ import { playgroundEndpoint, trpcApiEndpoint } from "./config/endpoint.mjs";
 import { appRouter, AppRouter } from "./routers/index.mjs";
 import { createContext } from "./trpc/context.mjs";
 import { logger } from "./utils/logger.mjs";
+import run_bootstrap from "./bootstrap.mjs";
 
-console.log("⚙️  process.env snapshot:", process.env.SERVER_PORT);
+await run_bootstrap();
 
 const app = express();
 

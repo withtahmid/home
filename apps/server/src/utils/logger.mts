@@ -1,26 +1,16 @@
 import winston from "winston";
-
+const { combine, timestamp, printf, colorize, align } = winston.format;
 const isDev = process.env.NODE_ENV !== "production";
-
 export const logger = winston.createLogger({
-    level: isDev ? "debug" : "info",
-    // logger.ts
-    format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.timestamp({ format: "HH:mm:ss" }),
-        winston.format.errors({ stack: true }),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
-            const formattedMsg =
-                typeof message === "object"
-                    ? JSON.stringify(message, null, 2)
-                    : message;
-            const metaString = Object.keys(meta).length
-                ? ` ${JSON.stringify(meta)}`
-                : "";
-            return `${timestamp} [${level}]: ${formattedMsg}${metaString}`;
-        })
+    level: isDev ? "silly" : "info",
+    format: combine(
+        timestamp({
+            format: "YYYY-MM-DD hh:mm:ss.SSS A",
+        }),
+        colorize({ all: true }),
+        align(),
+        printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
     ),
+    defaultMeta: { service: "home-mono" },
     transports: [new winston.transports.Console()],
-    handleExceptions: true,
-    handleRejections: true,
 });
