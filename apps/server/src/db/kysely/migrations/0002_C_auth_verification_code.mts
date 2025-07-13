@@ -13,10 +13,8 @@ export const up = async (db: Kysely<any>): Promise<void> => {
             col.references("user.id").notNull().onDelete("restrict")
         )
         .addColumn("code_hash", "text", (col) => col.notNull())
-        .addColumn(
-            "verification_type",
-            sql`auth_verification_code_type`,
-            (col) => col.notNull()
+        .addColumn("type", sql`auth_verification_code_type`, (col) =>
+            col.notNull()
         )
         .addColumn("used", "boolean", (col) => col.notNull().defaultTo(false))
         .addColumn("expires_at", "timestamptz", (col) => col.notNull())
@@ -47,6 +45,4 @@ export const down = async (db: Kysely<any>): Promise<void> => {
     await db.schema.dropTable("auth_verification_code").execute();
 
     await db.schema.dropType("auth_verification_code_type").execute();
-
-    await db.schema.dropTable("auth_verification_code").execute();
 };
